@@ -1,8 +1,6 @@
-# CHUNKING
-# EMBEDDING
 from langchain_community.document_loaders import PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.embeddings import HuggingFaceEmbeddings
 
 
 def load_pdf_file(data):
@@ -22,10 +20,10 @@ def text_split(extracted_data):
     return text_chunks
 
 
-def get_gemini_embeddings():
+def get_embeddings():
 
-    embeddings = GoogleGenerativeAIEmbeddings(
-        model="models/embedding-001"
+    embeddings = HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L6-v2"
     )
 
     return embeddings
