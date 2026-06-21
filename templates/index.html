@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Medical Chatbot</title>
+</head>
+<body>
+
+<h1>Medical Chatbot</h1>
+
+<input type="text" id="msg">
+<button onclick="sendMessage()">Send</button>
+
+<div id="chat"></div>
+
+<script>
+function sendMessage(){
+
+    let msg = document.getElementById("msg").value;
+
+    fetch("/get", {
+        method: "POST",
+        headers: {
+            "Content-Type":
+            "application/x-www-form-urlencoded"
+        },
+        body: "msg=" + encodeURIComponent(msg)
+    })
+    .then(response => response.json())
+    .then(data => {
+
+        document.getElementById("chat").innerHTML +=
+        "<p><b>You:</b> " + msg + "</p>" +
+        "<p><b>Bot:</b> " + data.response + "</p><hr>";
+    });
+}
+</script>
+
+</body>
+</html>
