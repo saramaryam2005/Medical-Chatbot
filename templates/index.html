@@ -1,21 +1,79 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Medical Chatbot</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical AI Assistant</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
 
-<h1>Medical Chatbot</h1>
+<div class="chat-container">
 
-<input type="text" id="msg" placeholder="Ask anything...">
-<button onclick="sendMessage()">Send</button>
+    <div class="chat-header">
+        <h1>🩺 Medical AI Assistant</h1>
+        <p>Powered by Gemini 2.5 Flash + Pinecone RAG</p>
+    </div>
 
-<div id="chat"></div>
+    <div class="chat-box" id="chat-box">
+
+        <div class="message bot-message">
+            Hello! Ask me anything from the medical encyclopedia.
+        </div>
+
+    </div>
+
+    <div class="chat-input">
+
+        <input
+            type="text"
+            id="msg"
+            placeholder="Ask a medical question..."
+        >
+
+        <button onclick="sendMessage()">
+            Send
+        </button>
+
+    </div>
+
+</div>
 
 <script>
-function sendMessage(){
 
-    let msg = document.getElementById("msg").value;
+function sendMessage() {
+
+    let msgInput = document.getElementById("msg");
+    let msg = msgInput.value.trim();
+
+    if(msg === ""){
+        return;
+    }
+
+    let chatBox = document.getElementById("chat-box");
+
+    // User Message
+    chatBox.innerHTML += `
+        <div class="message user-message">
+            ${msg}
+        </div>
+    `;
+
+    // Loading Animation
+    chatBox.innerHTML += `
+        <div class="message bot-message" id="typing">
+            <div class="typing">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    `;
+
+    chatBox.scrollTop = chatBox.scrollHeight;
 
     fetch("/get", {
         method: "POST",
@@ -25,14 +83,50 @@ function sendMessage(){
         },
         body: "msg=" + encodeURIComponent(msg)
     })
+
     .then(response => response.json())
+
     .then(data => {
 
-        document.getElementById("chat").innerHTML +=
-        "<p><b>You:</b> " + msg + "</p>" +
-        "<p><b>Bot:</b> " + data.response + "</p><hr>";
+        document.getElementById("typing").remove();
+
+        chatBox.innerHTML += `
+            <div class="message bot-message">
+                ${data.response}
+            </div>
+        `;
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+    })
+
+    .catch(error => {
+
+        document.getElementById("typing").remove();
+
+        chatBox.innerHTML += `
+            <div class="message bot-message">
+                Error: Unable to get response.
+            </div>
+        `;
+
+        console.error(error);
     });
+
+    msgInput.value = "";
 }
+
+
+// Press Enter to Send
+
+document.getElementById("msg")
+.addEventListener("keypress", function(event){
+
+    if(event.key === "Enter"){
+        sendMessage();
+    }
+
+});
+
 </script>
 
 </body>
