@@ -15,7 +15,9 @@ def chat():
 
     user_message = request.form["msg"]
 
-    response = get_response(user_message)
+    result = get_response(user_message)
+
+    return jsonify(result)
 
     return jsonify({
         "response": response
