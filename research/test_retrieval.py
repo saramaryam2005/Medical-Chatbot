@@ -39,5 +39,11 @@ print("\nRetrieved Documents:\n")
 for i, doc in enumerate(docs, start=1):
     print("=" * 50)
     print(f"Document {i}")
-    print(doc.page_content[:1000])
+
+    print("\nMetadata:")
+    print(doc.metadata)
+
+    print("\nContent:")
+    print(doc.page_content[:500])
+
     print()
