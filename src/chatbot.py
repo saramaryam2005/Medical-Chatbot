@@ -26,7 +26,7 @@ llm = ChatGoogleGenerativeAI(
 
 def get_response(query):
 
-    docs = vectorstore.similarity_search(query, k=10)
+    docs = vectorstore.similarity_search(query, k=5)
 
     context = "\n\n".join(
         [doc.page_content for doc in docs]
@@ -39,4 +39,17 @@ def get_response(query):
 
     response = llm.invoke(prompt)
 
-    return response.content
+    # Extract page numbers
+    pages = []
+
+    for doc in docs:
+
+        page = doc.metadata.get("page_label")
+
+        if page and page not in pages:
+            pages.append(page)
+
+    return {
+        "answer": response.content,
+        "sources": pages
+    }
