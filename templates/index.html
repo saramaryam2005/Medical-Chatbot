@@ -129,24 +129,6 @@ document.getElementById("msg")
 });
 
 </script>
-.then(data => {
-
-    let sources = "";
-
-    if(data.sources.length > 0){
-
-        sources =
-        "<p><b>Sources:</b> Pages " +
-        data.sources.join(", ") +
-        "</p>";
-    }
-
-    document.getElementById("chat").innerHTML +=
-    "<p><b>You:</b> " + msg + "</p>" +
-    "<p><b>Bot:</b> " + data.answer + "</p>" +
-    sources +
-    "<hr>";
-})
 
 </body>
 </html>
