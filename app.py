@@ -17,11 +17,10 @@ def chat():
 
     result = get_response(user_message)
 
-    return jsonify(result)
-
     return jsonify({
-        "response": response
-    })
+    "answer": result["answer"],
+    "sources": result["sources"]
+})
 
 
 if __name__ == "__main__":

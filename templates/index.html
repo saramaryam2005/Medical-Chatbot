@@ -89,16 +89,29 @@ function sendMessage() {
 
     .then(data => {
 
-        document.getElementById("typing").remove();
+    document.getElementById("typing").remove();
 
-        chatBox.innerHTML += `
-            <div class="message bot-message">
-                ${data.answer}
+    let sourceHTML = "";
+
+    if(data.sources && data.sources.length > 0){
+
+        sourceHTML = `
+            <div class="sources">
+                <strong>Sources:</strong>
+                Pages ${data.sources.join(", ")}
             </div>
         `;
+    }
 
-        chatBox.scrollTop = chatBox.scrollHeight;
-    })
+    chatBox.innerHTML += `
+        <div class="message bot-message">
+            ${data.answer}
+            ${sourceHTML}
+        </div>
+    `;
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+})
 
     .catch(error => {
 
