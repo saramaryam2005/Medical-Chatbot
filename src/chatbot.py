@@ -1,5 +1,3 @@
-
-
 import os
 from dotenv import load_dotenv
 
@@ -12,47 +10,25 @@ from src.prompt import system_prompt
 load_dotenv()
 
 
-vectorstore = None
-llm = None
-
-
-def initialize():
-
-    global vectorstore, llm
-
-    if vectorstore is None:
-
-        print("Loading embeddings...")
-
-        embeddings = get_embeddings()
-
-        print("Connecting to Pinecone...")
-
-        vectorstore = PineconeVectorStore(
-            index_name="medical-chatbot",
-            embedding=embeddings,
-            pinecone_api_key=os.getenv("PINECONE_API_KEY")
-        )
-
-    if llm is None:
-
-        print("Loading Gemini...")
-
-        llm = ChatGoogleGenerativeAI(
-            model="gemini-2.5-flash",
-            google_api_key=os.getenv("GEMINI_API_KEY"),
-            temperature=0.2
-        )
+llm = ChatGoogleGenerativeAI(
+    model="gemini-2.5-flash",
+    google_api_key=os.getenv("GEMINI_API_KEY"),
+    temperature=0.2
+)
 
 
 def get_response(query):
 
-    initialize()
+    # Load embeddings only when needed
+    embeddings = get_embeddings()
 
-    docs = vectorstore.similarity_search(
-        query,
-        k=5
+    vectorstore = PineconeVectorStore(
+        index_name="medical-chatbot",
+        embedding=embeddings,
+        pinecone_api_key=os.getenv("PINECONE_API_KEY")
     )
+
+    docs = vectorstore.similarity_search(query, k=5)
 
     context = "\n\n".join(
         [doc.page_content for doc in docs]
@@ -65,11 +41,9 @@ def get_response(query):
 
     response = llm.invoke(prompt)
 
-    # Extract source page numbers
     pages = []
 
     for doc in docs:
-
         page = doc.metadata.get("page_label")
 
         if page and page not in pages:
