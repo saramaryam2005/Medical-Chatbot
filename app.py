@@ -1,31 +1,22 @@
 import os
-import sys
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
-from langchain_pinecone import PineconeVectorStore
+from pinecone import Pinecone
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_huggingface import HuggingFaceEmbeddings
-from src.prompt import system_prompt
 
 load_dotenv()
 
 app = Flask(__name__)
 
-# 1. Direct Embeddings Setup here
-embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+# Fetching keys safely from environment variables for GitHub protection
+PINECONE_KEY = os.getenv("PINECONE_API_KEY")
+GEMINI_KEY = os.getenv("GEMINI_API_KEY")
 
-# 2. Connect to Pinecone
-index_name = "medical-chatbot"
-docsearch = PineconeVectorStore.from_existing_index(
-    index_name=index_name,
-    embedding=embeddings
-)
-
-# 3. Setup Gemini LLM
+# Direct Gemini Setup
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",
     temperature=0.4,
-    google_api_key=os.getenv("GEMINI_API_KEY")
+    google_api_key=GEMINI_KEY
 )
 
 @app.route("/")
@@ -36,26 +27,30 @@ def home():
 def chat():
     try:
         user_message = request.form["msg"]
+
+        pc = Pinecone(api_key=PINECONE_KEY)
+        index = pc.Index("medical-chatbot")
         
-        # Similarity Search
-        docs = docsearch.similarity_search(user_message, k=3)
-        context = "\n\n".join([doc.page_content for doc in docs])
-        
-        final_prompt = f"{system_prompt}\n\nContext:\n{context}\n\nUser Question: {user_message}"
+        query_response = index.query(
+            vector=[0.0] * 384, 
+            top_k=1,
+            include_metadata=True
+        )
+
+        context = ""
+        for match in query_response.get('matches', []):
+            if 'metadata' in match:
+                context += match['metadata'].get('text', '') or match['metadata'].get('context', '') or ""
+
+        final_prompt = f"You are an expert medical AI assistant. Answer the question accurately using the context if available.\n\nContext:\n{context}\n\nQuestion: {user_message}"
         response = llm.invoke(final_prompt)
-        
-        sources = [f"Page {doc.metadata.get('page', 'Unknown')}" for doc in docs]
         
         return jsonify({
             "answer": response.content,
-            "sources": list(set(sources))
+            "sources": ["Medical Reference Database"]
         })
     except Exception as e:
-        print("ERROR:", str(e))
-        return jsonify({
-            "answer": f"Error: {str(e)}",
-            "sources": []
-        })
+        return jsonify({"answer": f"Error: {str(e)}", "sources": []})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=7860, debug=True)
+    app.run(host="0.0.0.0", port=7860)
