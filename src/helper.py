@@ -1,7 +1,7 @@
 import os
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 
 def load_pdf_file(data):
     loader = PyPDFLoader(data)
@@ -17,8 +17,6 @@ def text_split(extracted_data):
     return text_chunks
 
 def get_embeddings():
-    embeddings = GoogleGenerativeAIEmbeddings(
-        model="text-embedding-004",
-        google_api_key=os.getenv("GEMINI_API_KEY")
-    )
+    # Google ko hata kar open-source standard embeddings set kar di
+    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
     return embeddings
