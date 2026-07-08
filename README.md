@@ -21,33 +21,63 @@ Access the running application directly on Hugging Face Spaces:
 ---
 🏗️ Architecture
                           ┌─────────────────────┐
+                          
                           │ Medical Reference   │
+                          
                           │   Data / Index      │
+                          
                           └──────────┬──────────┘
+                          
                                      │
+                                     
                                      ▼
+                                     
                              Pinecone Database
+                             
                                      ▲
+                                     
                                      │
+                                     
                              Direct Search / Query 
+                             
                                      ▲
+                                     
                                      │
+                                     
                              User Question
+                             
                                      │
+                                     
                                      ▼
+                                     
                             Retrieve Relevant Context
+                            
                                      │
+                                     
                                      ▼
+                                     
                              Prompt + Retrieved Context
+                             
                                      │
+                                     
                                      ▼
+                                     
                              Google Gemini LLM
+                             
                                      │
+                                     
                                      ▼
+                                     
                               Flask Backend (Gunicorn)
+                              
                                      │
+                                     
                                      ▼
+                                     
                        HTML5 • CSS3 • JavaScript (Fetch API)
+                       
+
+                       
 
 | Category | Technologies |
 | :--- | :--- |
@@ -62,6 +92,7 @@ Access the running application directly on Hugging Face Spaces:
 
 
 Workflow :-
+
 1- User types a health or clinical question into the chatbot interface.
 
 2- The interactive UI sends an asynchronous POST request to the Flask backend's /get route.
